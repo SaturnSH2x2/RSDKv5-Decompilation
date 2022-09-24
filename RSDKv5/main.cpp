@@ -1,10 +1,9 @@
 #include "RSDK/Core/RetroEngine.hpp"
 #include "main.hpp"
 
-#if RETRO_PLATFORM == RETRO_3DS 
-bool RSDK::printToConsole;
-#endif
 
+__attribute__((weak)) u32 __ctru_heap_size        = 0x3280000;
+__attribute__((weak)) u32 __ctru_linear_heap_size = 0x200000;
 #if RETRO_STANDALONE
 
 #if RETRO_PLATFORM == RETRO_WIN && !RETRO_RENDERDEVICE_SDL2
@@ -69,12 +68,6 @@ int32 RSDK_main(int32 argc, char **argv, void *linkLogicPtr)
 
 #if RETRO_PLATFORM == RETRO_3DS
   osSetSpeedupEnable(true);
-
-  hidScanInput();
-  if (hidKeysDown() & KEY_SELECT)
-    RSDK::printToConsole = true;
-  else 
-    RSDK::printToConsole = false;
 #endif
 
     RSDK::linkGameLogic = (RSDK::LogicLinkHandle)linkLogicPtr;

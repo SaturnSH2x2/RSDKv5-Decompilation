@@ -15,8 +15,6 @@ void InitFirstStage();
 void ProcessStage();
 void HandleCameras();
 
-void ProcessParallaxAutoScroll();
-
 void LoadStageFiles();
 void LoadActLayout();
 void LoadStageBackground();

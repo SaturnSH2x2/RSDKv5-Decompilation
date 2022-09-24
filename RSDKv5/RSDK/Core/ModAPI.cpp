@@ -600,15 +600,11 @@ bool32 RSDK::LoadMod(ModInfo *info, std::string modsPath, std::string folder, bo
             while (std::getline(stream, buf, ',')) {
                 buf        = trim(buf);
                 int32 mode = 0;
-                fs::path file;
-                if (MODAPI_ENDS_WITH(".ini")) {
-                    file = fs::path(modDir + "/" + buf + ".ini");
+                if (MODAPI_ENDS_WITH(".ini"))
                     mode = 1;
-                }
-                else if (MODAPI_ENDS_WITH(".cfg")) {
-                    file = fs::path(modDir + "/" + buf + ".cfg");
+                else if (MODAPI_ENDS_WITH(".cfg"))
                     mode = 2;
-                }
+                fs::path file;
 
                 if (!mode) {
                     file = fs::path(modDir + "/" + buf + ".ini");
@@ -624,11 +620,11 @@ bool32 RSDK::LoadMod(ModInfo *info, std::string modsPath, std::string folder, bo
                 // if fail just free do nothing
                 if (!mode)
                     continue;
+                saveCfg = true;
 
                 if (mode == 1) {
                     FileIO *set = fOpen(file.string().c_str(), "r");
                     if (set) {
-                        saveCfg = true;
                         fClose(set);
                         using namespace std;
                         auto ini  = iniparser_load(file.string().c_str());

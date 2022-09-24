@@ -1156,9 +1156,8 @@ void RSDK::Legacy::v3::ConvertFunctionText(char *text)
 
             // Eg: TempValue0 = TypeName[PlayerObject]
             if (StrComp(funcName, "TypeName")) {
-                funcName[0] = '0';
-                funcName[1] = 0;
-
+                funcName[0] = 0;
+                AppendIntegerToString(funcName, 0);
                 for (int32 o = 0; o < LEGACY_v3_OBJECT_COUNT; ++o) {
                     if (StrComp(arrayStr, typeNames[o])) {
                         funcName[0] = 0;
@@ -1170,9 +1169,8 @@ void RSDK::Legacy::v3::ConvertFunctionText(char *text)
 #if RETRO_USE_MOD_LOADER
             // Eg: TempValue0 = SfxName[Jump]
             if (StrComp(funcName, "SfxName")) {
-                funcName[0] = '0';
-                funcName[1] = 0;
-
+                funcName[0] = 0;
+                AppendIntegerToString(funcName, 0);
                 int32 s = 0;
                 for (; s < globalSFXCount; ++s) {
                     if (StrComp(arrayStr, globalSfxNames[s])) {
@@ -1200,7 +1198,6 @@ void RSDK::Legacy::v3::ConvertFunctionText(char *text)
             // Eg: TempValue0 = AchievementName[ACH_RING_KING]
             if (StrComp(funcName, "AchievementName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 a = 0;
                 for (; a < (int32)achievementList.size(); ++a) {
@@ -1229,7 +1226,6 @@ void RSDK::Legacy::v3::ConvertFunctionText(char *text)
             // Eg: TempValue0 = PlayerName[SONIC]
             if (StrComp(funcName, "PlayerName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 p = 0;
                 for (; p < LEGACY_PLAYERNAME_COUNT; ++p) {
@@ -1258,7 +1254,6 @@ void RSDK::Legacy::v3::ConvertFunctionText(char *text)
             // Eg: TempValue0 = StageName[R - PALMTREE PANIC ZONE 1 A]
             if (StrComp(funcName, "StageName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 s = -1;
                 if (StrLength(arrayStr) >= 2) {
@@ -1813,6 +1808,7 @@ void RSDK::Legacy::v3::LoadBytecode(int32 scriptID, bool32 globalCode)
     FileInfo info;
     InitFileInfo(&info);
     if (LoadFile(&info, scriptPath, FMODE_RB)) {
+        uint8 fileBuffer     = 0;
         int32 *scriptCodePtr = &scriptCode[scriptCodePos];
         int32 *jumpTablePtr  = &jumpTable[jumpTablePos];
 
@@ -3494,12 +3490,10 @@ void RSDK::Legacy::v3::ProcessScript(int32 scriptCodeStart, int32 jumpTableStart
                 opcodeSize = 0;
                 StopSfx(scriptEng.operands[0]);
                 break;
-            case FUNC_SETSFXATTRIBUTES: {
-                opcodeSize      = 0;
-                int32 channelID = PlaySfx(scriptEng.operands[0], false);
-                SetSfxAttributes(channelID, scriptEng.operands[1], scriptEng.operands[2]);
+            case FUNC_SETSFXATTRIBUTES:
+                opcodeSize = 0;
+                SetSfxAttributes(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2]);
                 break;
-            }
             case FUNC_OBJECTTILECOLLISION:
                 opcodeSize = 0;
                 switch (scriptEng.operands[0]) {

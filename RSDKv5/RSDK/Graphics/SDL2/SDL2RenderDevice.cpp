@@ -752,7 +752,8 @@ void RenderDevice::ProcessEvent(SDL_Event event)
             switch (event.button.button) {
                 case SDL_BUTTON_LEFT: touchInfo.down[0] = true; touchInfo.count = 1;
 #if !RETRO_REV02
-                    RSDK::SKU::buttonDownCount++;
+                    if (RSDK::SKU::buttonDownCount > 0)
+                        RSDK::SKU::buttonDownCount--;
 #endif
                     break;
 
@@ -769,7 +770,8 @@ void RenderDevice::ProcessEvent(SDL_Event event)
             switch (event.button.button) {
                 case SDL_BUTTON_LEFT: touchInfo.down[0] = false; touchInfo.count = 0;
 #if !RETRO_REV02
-                    RSDK::SKU::buttonDownCount--;
+                    if (RSDK::SKU::buttonDownCount > 0)
+                        RSDK::SKU::buttonDownCount--;
 #endif
                     break;
 
@@ -985,15 +987,8 @@ void RenderDevice::ProcessEvent(SDL_Event event)
                     break;
 
 #if !RETRO_REV02 && RETRO_INPUTDEVICE_KEYBOARD
-                case SDL_SCANCODE_ESCAPE:
-                    RSDK::SKU::specialKeyStates[0] = false;
-                    SKU::ClearKeyState(event.key.keysym.scancode);
-                    break;
-
-                case SDL_SCANCODE_RETURN:
-                    RSDK::SKU::specialKeyStates[1] = false;
-                    SKU::ClearKeyState(event.key.keysym.scancode);
-                    break;
+                case SDL_SCANCODE_ESCAPE: RSDK::SKU::specialKeyStates[0] = false; break;
+                case SDL_SCANCODE_RETURN: RSDK::SKU::specialKeyStates[1] = false; break;
 #endif
                 case SDL_SCANCODE_BACKSPACE: engine.gameSpeed = 1; break;
             }

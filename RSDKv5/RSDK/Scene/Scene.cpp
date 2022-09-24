@@ -463,7 +463,7 @@ void RSDK::LoadSceneAssets()
 
 #if !RETRO_USE_ORIGINAL_CODE
             if (!classID && i >= TYPE_DEFAULT_COUNT)
-                PrintLog(PRINT_NORMAL, "Object Class %d is unimplemented!", i);
+                PrintLog(PRINT_NORMAL, "Object Class %d is unimplimented!", i);
 #endif
 
             ObjectClass *objectClass = &objectClassList[stageObjectIDs[classID]];

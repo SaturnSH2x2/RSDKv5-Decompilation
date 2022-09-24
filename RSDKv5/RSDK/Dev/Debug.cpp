@@ -164,7 +164,7 @@ void RSDK::AddViewableVariable(const char *name, void *value, int32 type, int32 
 #endif
 
 #if !RETRO_REV02
-void RSDK::PrintMessage(void *msg, uint8 type)
+void RSDK::PrintMessage(void *msg, int32 type)
 {
     useEndLine = false;
 
@@ -439,7 +439,17 @@ void RSDK::DevMenu_MainMenu()
 #endif
         switch (devMenu.selection) {
             case 0:
-                CloseDevMenu();
+#if RETRO_REV0U
+                switch (engine.version) {
+                    default:
+                    case 5: sceneInfo.state = devMenu.sceneState; break;
+
+                    case 4:
+                    case 3: RSDK::Legacy::gameMode = devMenu.sceneState; break;
+                }
+#else
+                sceneInfo.state = devMenu.sceneState;
+#endif
                 break;
 
             case 1:
@@ -842,7 +852,7 @@ void RSDK::DevMenu_OptionsMenu()
         switch (devMenu.selection) {
             case 0: {
                 devMenu.windowed    = videoSettings.windowed;
-                devMenu.windowScale = (videoSettings.windowHeight / videoSettings.pixHeight) - 1;
+                devMenu.windowScale = (videoSettings.windowWidth / videoSettings.pixWidth) - 1;
 
                 int32 aspect = (int32)((videoSettings.windowWidth / (float)videoSettings.windowHeight) * (float)SCREEN_YSIZE) >> 3;
                 switch (aspect) {
@@ -1045,7 +1055,6 @@ void RSDK::DevMenu_VideoOptionsMenu()
                 shaderList[0].linear   = !devMenu.windowed;
                 if (!devMenu.windowScale)
                     videoSettings.shaderID = SHADER_NONE;
-                devMenu.windowScale++;
 
                 int32 width = 0;
                 switch (devMenu.windowAspect) {
@@ -1066,8 +1075,8 @@ void RSDK::DevMenu_VideoOptionsMenu()
                     width = DEFAULT_PIXWIDTH;
 #endif
 
-                videoSettings.windowWidth  = width * devMenu.windowScale;
-                videoSettings.windowHeight = videoSettings.pixHeight * devMenu.windowScale;
+                videoSettings.windowWidth  = width * (devMenu.windowScale + 1);
+                videoSettings.windowHeight = videoSettings.pixHeight * (devMenu.windowScale + 1);
                 UpdateGameWindow();
 
                 devMenu.state     = DevMenu_OptionsMenu;
@@ -1313,8 +1322,6 @@ void RSDK::DevMenu_InputOptionsMenu()
             devMenu.state        = DevMenu_KeyMappingsMenu;
             devMenu.scrollPos    = 0;
             changedVideoSettings = true;
-
-            controller[CONT_P1 + devMenu.selection].keyUp.keyMap = KEYMAP_AUTO_MAPPING;
         }
     }
 
@@ -1345,7 +1352,7 @@ void RSDK::DevMenu_KeyMappingsMenu()
     dy += 44;
     DrawRectangle(currentScreen->center.x - 128, dy - 8, 0x100, 0x48, 0x80, 0xFF, INK_NONE, true);
 
-    int32 controllerID = CONT_P1 + devMenu.selection;
+    int32 controllerID = devMenu.selection + 1;
     switch (devMenu.scrollPos) {
         case 0:
             DrawDevString("Press Key For UP", currentScreen->center.x, dy, ALIGN_CENTER, 0xF0F080);

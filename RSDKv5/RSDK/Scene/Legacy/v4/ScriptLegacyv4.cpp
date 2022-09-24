@@ -1789,7 +1789,6 @@ void RSDK::Legacy::v4::ConvertFunctionText(char *text)
             // Eg: temp0 = TypeName[Player Object]
             if (StrComp(funcName, "TypeName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 o = 0;
                 for (; o < LEGACY_v4_OBJECT_COUNT; ++o) {
@@ -1803,11 +1802,9 @@ void RSDK::Legacy::v4::ConvertFunctionText(char *text)
                 if (o == LEGACY_v4_OBJECT_COUNT)
                     PrintLog(PRINT_NORMAL, "WARNING: Unknown typename \"%s\", on line %d", arrayStr, lineID);
             }
-
             // Eg: temp0 = SfxName[Jump]
             if (StrComp(funcName, "SfxName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 s = 0;
                 for (; s < SFX_COUNT; ++s) {
@@ -1826,7 +1823,6 @@ void RSDK::Legacy::v4::ConvertFunctionText(char *text)
             // Eg: temp0 = VarName[player.lives]
             if (StrComp(funcName, "VarName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 v = 0;
                 for (; v < globalVariablesCount; ++v) {
@@ -1844,7 +1840,6 @@ void RSDK::Legacy::v4::ConvertFunctionText(char *text)
             // Eg: temp0 = AchievementName[ACH_RING_KING]
             if (StrComp(funcName, "AchievementName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 a = 0;
                 for (; a < (int32)achievementList.size(); ++a) {
@@ -1874,7 +1869,6 @@ void RSDK::Legacy::v4::ConvertFunctionText(char *text)
             // Eg: temp0 = PlayerName[SONIC]
             if (StrComp(funcName, "PlayerName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 p = 0;
                 for (; p < LEGACY_PLAYERNAME_COUNT; ++p) {
@@ -1903,7 +1897,6 @@ void RSDK::Legacy::v4::ConvertFunctionText(char *text)
             // Eg: temp0 = StageName[R - GREEN HILL ZONE 1]
             if (StrComp(funcName, "StageName")) {
                 funcName[0] = '0';
-                funcName[1] = 0;
 
                 int32 s = -1;
                 if (StrLength(arrayStr) >= 2) {
@@ -2091,7 +2084,6 @@ void RSDK::Legacy::v4::CheckCaseNumber(char *text)
         // Eg: temp0 = TypeName[Player Object]
         if (StrComp(caseValue, "TypeName")) {
             caseValue[0] = '0';
-            caseValue[1] = 0;
 
             int32 o = 0;
             for (; o < LEGACY_v4_OBJECT_COUNT; ++o) {
@@ -2109,7 +2101,6 @@ void RSDK::Legacy::v4::CheckCaseNumber(char *text)
         // Eg: temp0 = SfxName[Jump]
         if (StrComp(caseValue, "SfxName")) {
             caseValue[0] = '0';
-            caseValue[1] = 0;
 
             int32 s = 0;
             for (; s < SFX_COUNT; ++s) {
@@ -2128,7 +2119,6 @@ void RSDK::Legacy::v4::CheckCaseNumber(char *text)
         // Eg: temp0 = VarName[player.lives]
         if (StrComp(caseValue, "VarName")) {
             caseValue[0] = '0';
-            caseValue[1] = 0;
 
             int32 v = 0;
             for (; v < globalVariablesCount; ++v) {
@@ -2146,7 +2136,6 @@ void RSDK::Legacy::v4::CheckCaseNumber(char *text)
         // Eg: temp0 = AchievementName[ACH_RING_KING]
         if (StrComp(caseValue, "AchievementName")) {
             caseValue[0] = '0';
-            caseValue[1] = 0;
 
             int32 a = 0;
             for (; a < (int32)achievementList.size(); ++a) {
@@ -2176,7 +2165,6 @@ void RSDK::Legacy::v4::CheckCaseNumber(char *text)
         // Eg: temp0 = PlayerName[SONIC]
         if (StrComp(caseValue, "PlayerName")) {
             caseValue[0] = '0';
-            caseValue[1] = 0;
 
             int32 p = 0;
             for (; p < LEGACY_PLAYERNAME_COUNT; ++p) {
@@ -2205,7 +2193,6 @@ void RSDK::Legacy::v4::CheckCaseNumber(char *text)
         // Eg: temp0 = StageName[R - GREEN HILL ZONE 1]
         if (StrComp(caseValue, "StageName")) {
             caseValue[0] = '0';
-            caseValue[1] = 0;
 
             int32 s = -1;
             if (StrLength(arrayStr) >= 2) {
@@ -2296,7 +2283,6 @@ bool32 RSDK::Legacy::v4::ReadSwitchCase(char *text)
             // Eg: temp0 = TypeName[Player Object]
             if (StrComp(caseValue, "TypeName")) {
                 caseValue[0] = '0';
-                caseValue[1] = 0;
 
                 int32 o = 0;
                 for (; o < LEGACY_v4_OBJECT_COUNT; ++o) {
@@ -2314,7 +2300,6 @@ bool32 RSDK::Legacy::v4::ReadSwitchCase(char *text)
             // Eg: temp0 = SfxName[Jump]
             if (StrComp(caseValue, "SfxName")) {
                 caseValue[0] = '0';
-                caseValue[1] = 0;
 
                 int32 s = 0;
                 for (; s < SFX_COUNT; ++s) {
@@ -2333,7 +2318,6 @@ bool32 RSDK::Legacy::v4::ReadSwitchCase(char *text)
             // Eg: temp0 = VarName[player.lives]
             if (StrComp(caseValue, "VarName")) {
                 caseValue[0] = '0';
-                caseValue[1] = 0;
 
                 int32 v = 0;
                 for (; v < globalVariablesCount; ++v) {
@@ -2351,7 +2335,6 @@ bool32 RSDK::Legacy::v4::ReadSwitchCase(char *text)
             // Eg: temp0 = AchievementName[ACH_RING_KING]
             if (StrComp(caseValue, "AchievementName")) {
                 caseValue[0] = '0';
-                caseValue[1] = 0;
 
                 int32 a = 0;
                 for (; a < (int32)achievementList.size(); ++a) {
@@ -2381,7 +2364,6 @@ bool32 RSDK::Legacy::v4::ReadSwitchCase(char *text)
             // Eg: temp0 = PlayerName[SONIC]
             if (StrComp(caseValue, "PlayerName")) {
                 caseValue[0] = '0';
-                caseValue[1] = 0;
 
                 int32 p = 0;
                 for (; p < LEGACY_PLAYERNAME_COUNT; ++p) {
@@ -2410,7 +2392,6 @@ bool32 RSDK::Legacy::v4::ReadSwitchCase(char *text)
             // Eg: temp0 = StageName[R - GREEN HILL ZONE 1]
             if (StrComp(caseValue, "StageName")) {
                 caseValue[0] = '0';
-                caseValue[1] = 0;
 
                 int32 s = -1;
                 if (StrLength(arrayStr) >= 2) {
@@ -5107,8 +5088,8 @@ void RSDK::Legacy::v4::ProcessScript(int32 scriptCodeStart, int32 jumpTableStart
 
                 // Mission Mode stuff
                 if (!scriptEng.checkResult) {
-                    int32 targetLength  = (int32)strlen(sceneInfo.listData[sceneInfo.listPos].folder);
-                    int32 currentLength = (int32)strlen(scriptText);
+                    int32 targetLength  = strlen(sceneInfo.listData[sceneInfo.listPos].folder);
+                    int32 currentLength = strlen(scriptText);
                     if (targetLength > currentLength) {
                         scriptEng.checkResult = StrComp(&sceneInfo.listData[sceneInfo.listPos].folder[targetLength - currentLength], scriptText);
                     }

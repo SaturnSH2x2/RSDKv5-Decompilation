@@ -281,8 +281,8 @@ inline void SetSaveStatusError()
 }
 inline void ClearSaveStatus() { userStorage->saveStatus = STATUS_NONE; }
 inline void SetSaveStatusContinue() { userStorage->saveStatus = STATUS_CONTINUE; }
-inline void SetUserStorageNoSave(bool32 noSave) { userStorage->noSaveActive = noSave; }
-inline bool32 GetUserStorageNoSave() { return userStorage->noSaveActive; }
+inline void SetUserStorageNoSave(int32 state) { userStorage->noSaveActive = state; }
+inline int32 GetUserStorageNoSave() { return userStorage->noSaveActive; }
 
 // =======================
 // USER DB API
@@ -313,7 +313,7 @@ inline int32 AddUserDBRow(uint16 tableID)
 
     return userDB->AddRow();
 }
-inline bool32 RemoveDBRow(uint16 tableID, uint16 rowID)
+inline bool32 RemoveDBRow(uint16 tableID, uint32 rowID)
 {
     if (tableID == (uint16)-1 || rowID == (uint16)-1)
         return false;
@@ -347,7 +347,7 @@ inline uint16 GetUserDBRowByID(uint16 tableID, uint32 uuid)
     return userDB->GetRowByID(uuid);
 }
 
-inline uint32 GetDBRowUUID(uint16 tableID, uint16 rowID)
+inline uint32 GetDBRowUUID(uint16 tableID, int32 rowID)
 {
     if (tableID == (uint16)-1 || rowID == (uint16)-1)
         return 0;
@@ -371,8 +371,8 @@ bool32 GetUserDBValue(uint16 tableID, uint32 rowID, int32 type, char *name, void
 bool32 SetUserDBValue(uint16 tableID, uint32 rowID, int32 type, char *name, void *value);
 
 // UserDB Misc
-bool32 GetUserDBRowsChanged(uint16 tableID);
-void GetUserDBRowCreationTime(uint16 tableID, uint16 rowID, char *buf, size_t size, char *format);
+int32 GetUserDBRowsChanged(uint16 tableID);
+void GetUserDBRowCreationTime(uint16 tableID, int32 entryID, char *buf, size_t size, char *format);
 
 // =======================
 // USER DB CALLBACKS
