@@ -204,6 +204,9 @@ bool32 RSDK::OpenDataFile(FileInfo *info, const char *filename)
                 return false;
             }
 
+            if (!info->iocache)
+              info->iocache = (uint8*)malloc(file->size);
+            setvbuf(info->file, (char*)info->iocache, _IOFBF, file->size);
             fSeek(info->file, file->offset, SEEK_SET);
         }
         else {

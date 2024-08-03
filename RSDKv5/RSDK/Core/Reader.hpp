@@ -48,6 +48,7 @@ struct FileInfo {
     int32 externalFile;
     FileIO *file;
     uint8 *fileBuffer;
+    uint8 *iocache;
     int32 readPos;
     int32 fileOffset;
     uint8 usingFileBuffer;
@@ -111,6 +112,7 @@ inline void InitFileInfo(FileInfo *info)
     info->encrypted       = false;
     info->readPos         = 0;
     info->fileOffset      = 0;
+    info->iocache         = NULL;
 }
 
 bool32 LoadFile(FileInfo *info, const char *filename, uint8 fileMode);
@@ -121,6 +123,10 @@ inline void CloseFile(FileInfo *info)
         fClose(info->file);
 
     info->file = NULL;
+    if (info->iocache) {
+        free(info->iocache);
+        info->iocache = NULL;
+    }
 }
 
 void GenerateELoadKeys(FileInfo *info, const char *key1, int32 key2);
