@@ -7,11 +7,10 @@ git clone --recursive https://github.com/SaturnSH2x2/RSDKv5-Decompilation.git So
 
 echo "## Switching to 3ds-main branch"
 cd Sonic-Mania-Decompilation/dependencies/v5_3DS
-git checkout 3ds-main
 cd ../../
 
 echo "## Creating build directory"
-mkdir build
+mkdir -p build
 cd build
 
 echo "## Building"
