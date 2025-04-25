@@ -347,13 +347,33 @@ void RSDK::DevMenu_MainMenu()
     DrawDevString("Dev Menu", currentScreen->center.x, y, ALIGN_CENTER, 0xF0F0F0);
 
     y += 8;
+
+#if RETRO_PLATFORM == RETRO_3DS
+    bool isNew3DS;
+    APT_CheckNew3DS(&isNew3DS);
+    int offset;
+
+    char n3DSStr[4];
+    if (isNew3DS) {
+      snprintf(n3DSStr, 4, "Yes");
+      offset = 52;
+    } else { 
+      snprintf(n3DSStr, 4, "No");
+      offset = 48;
+    }
+
+    FormatDevString(currentScreen->center.x - offset, y, 0, 0x808090, "New 3DS: %s", n3DSStr);
+#endif
+
 #if RETRO_USE_MOD_LOADER
     if (devMenu.modsChanged)
         DrawDevString("Game will restart on resume!", currentScreen->center.x, y, ALIGN_CENTER, 0xF08080);
-#ifdef RETRO_DEV_EXTRA
+
+#if RETRO_DEV_EXTRA
     else
         DrawDevString(RETRO_DEV_EXTRA, currentScreen->center.x, y, ALIGN_CENTER, 0x808090);
 #endif
+
 #endif
     y += 8;
     DrawDevString(gameVerInfo.gameTitle, currentScreen->center.x, y, ALIGN_CENTER, 0x808090);
@@ -373,7 +393,7 @@ void RSDK::DevMenu_MainMenu()
         y += 12;
 #endif
     }
-    y += 20;
+    y += 10;
 
     DrawRectangle(currentScreen->center.x - 128, y - 2, 0x100, 52, 0x80, 0xFF,
                   INK_NONE, true);
