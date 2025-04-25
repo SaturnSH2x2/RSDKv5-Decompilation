@@ -105,6 +105,7 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
 #endif
     }
 
+    InitCache(ENABLE_STATIC_CACHE);
     RenderDevice::InitFPSCap();
 
 #if RETRO_PLATFORM == RETRO_3DS
@@ -333,6 +334,7 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
     SaveSettingsINI(false);
     SKU::ReleaseUserCore();
     ReleaseStorage();
+    FreeCache();
 #if RETRO_USE_MOD_LOADER
     UnloadMods();
 #endif
