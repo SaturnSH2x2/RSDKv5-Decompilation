@@ -190,7 +190,7 @@ inline void ClearSpriteAnimations()
     }
 }
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/AnimationLegacy.hpp"
 #endif
 

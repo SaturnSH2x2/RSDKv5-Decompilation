@@ -238,7 +238,7 @@ inline void Clear3DScenes()
     }
 }
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/Scene3DLegacy.hpp"
 #endif
 

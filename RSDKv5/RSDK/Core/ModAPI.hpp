@@ -423,7 +423,7 @@ bool32 GetGroupEntities(uint16 group, void **entity);
 
 #endif
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/ModAPILegacy.hpp"
 #endif
 

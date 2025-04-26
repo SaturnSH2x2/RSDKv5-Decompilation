@@ -320,7 +320,7 @@ void DrawLayerRotozoom(TileLayer *layer);
 // Draw a "basic" layer, no special capabilities, but it's the fastest to draw
 void DrawLayerBasic(TileLayer *layer);
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/SceneLegacy.hpp"
 #endif
 

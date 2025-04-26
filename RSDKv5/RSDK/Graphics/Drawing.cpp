@@ -2,7 +2,7 @@
 
 using namespace RSDK;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/DrawingLegacy.cpp"
 #endif
 
@@ -396,7 +396,7 @@ void RSDK::SetScreenSize(uint8 screenID, uint16 width, uint16 height)
 
         screen->waterDrawPos = screen->size.y;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
         RSDK::Legacy::SCREEN_XSIZE        = width;
         RSDK::Legacy::SCREEN_CENTERX      = width / 2;
         RSDK::Legacy::SCREEN_SCROLL_LEFT  = RSDK::Legacy::SCREEN_CENTERX - 8;

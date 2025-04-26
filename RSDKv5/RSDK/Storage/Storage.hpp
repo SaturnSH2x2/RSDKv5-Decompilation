@@ -110,7 +110,7 @@ void RemoveStorageEntry(void **dataPtr);
 void CopyStorage(uint32 **src, uint32 **dst);
 void GarbageCollectStorage(StorageDataSets dataSet);
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/UserStorageLegacy.hpp"
 #endif
 

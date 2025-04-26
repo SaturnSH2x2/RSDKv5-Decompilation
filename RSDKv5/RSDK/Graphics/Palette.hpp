@@ -109,7 +109,7 @@ void BlendColors(uint8 destBankID, uint32 *srcColorsA, uint32 *srcColorsB, int32
 #endif
 void SetPaletteFade(uint8 destBankID, uint8 srcBankA, uint8 srcBankB, int16 blendAmount, int32 startIndex, int32 endIndex);
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/PaletteLegacy.hpp"
 #endif
 

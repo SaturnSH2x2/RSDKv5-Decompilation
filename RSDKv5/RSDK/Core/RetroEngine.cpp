@@ -2,7 +2,7 @@
 
 using namespace RSDK;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/RetroEngineLegacy.cpp"
 #endif
 
@@ -181,7 +181,7 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
 #endif
 
 #if RETRO_USE_MOD_LOADER
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
                     if (((engine.version == 5 && sceneInfo.state != ENGINESTATE_DEVMENU)
                          || (engine.version != 5 && RSDK::Legacy::gameMode != RSDK::Legacy::ENGINE_DEVMENU))
                         && devMenu.modsChanged) {
@@ -198,7 +198,7 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
                         forceHardReset = true;
 #endif
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
                         int32 preVersion = engine.version;
 
                         DetectEngineVersion();
@@ -266,7 +266,7 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
                     if (engine.devMenu)
                         ProcessDebugCommands();
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
                     switch (engine.version) {
                         default:
                         case 5: ProcessEngine(); break;
@@ -293,7 +293,7 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
 
                         if (tx <= 32 && ty <= 32) {
                             if (engine.devMenu) {
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
                                 if (sceneInfo.state != ENGINESTATE_DEVMENU && RSDK::Legacy::gameMode != RSDK::Legacy::ENGINE_DEVMENU)
 #else
                                 if (sceneInfo.state != ENGINESTATE_DEVMENU)
@@ -643,12 +643,12 @@ void RSDK::InitEngine()
     ShowLoadingIcon(); // if valid
 #endif
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
     switch (engine.version) {
         case 5:
 #endif
             StartGameObjects();
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
             break;
 
         case 4:
@@ -1369,7 +1369,7 @@ void RSDK::ProcessDebugCommands()
 #endif
 
     if (controller[CONT_P1].keySelect.press) {
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
         if (sceneInfo.state == ENGINESTATE_DEVMENU || RSDK::Legacy::gameMode == RSDK::Legacy::ENGINE_DEVMENU)
 #else
         if (sceneInfo.state == ENGINESTATE_DEVMENU)
@@ -1379,7 +1379,7 @@ void RSDK::ProcessDebugCommands()
             OpenDevMenu();
     }
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
     int32 state          = engine.version == 5 ? sceneInfo.state : Legacy::stageMode;
     const int32 stepOver = engine.version == 5 ? (int32)ENGINESTATE_STEPOVER : (int32)Legacy::STAGEMODE_STEPOVER;
 #else
@@ -1418,7 +1418,7 @@ void RSDK::ProcessDebugCommands()
             state ^= stepOver;
     }
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
     if (engine.version != 5)
         Legacy::stageMode = state;
     else

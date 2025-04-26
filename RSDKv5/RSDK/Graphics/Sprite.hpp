@@ -120,7 +120,7 @@ struct ImageTGA : public Image {
 uint16 LoadSpriteSheet(const char *filename, uint8 scope);
 bool32 LoadImage(const char *filename, double displayLength, double fadeSpeed, bool32 (*skipCallback)());
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/SpriteLegacy.hpp"
 #endif
 

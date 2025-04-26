@@ -149,7 +149,7 @@ void LWallCollision(CollisionSensor *sensor);
 void RoofCollision(CollisionSensor *sensor);
 void RWallCollision(CollisionSensor *sensor);
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/CollisionLegacy.hpp"
 #endif
 

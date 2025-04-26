@@ -2,7 +2,7 @@
 
 using namespace RSDK;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/Scene3DLegacy.cpp"
 #endif
 

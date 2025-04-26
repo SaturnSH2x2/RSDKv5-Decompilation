@@ -226,6 +226,8 @@ enum GameRegions {
 #define RETRO_REVISION (3)
 #endif
 
+
+
 // RSDKv5 Rev02 (Used prior to Sonic Mania Plus)
 #define RETRO_REV01 (RETRO_REVISION >= 1)
 
@@ -240,6 +242,12 @@ enum GameRegions {
 
 // Enables only EGS's ingame achievements popup without enabling anything else
 #define RETRO_USE_DUMMY_ACHIEVEMENTS (RETRO_REV02 && 1)
+
+#if RETRO_REV0U && RETRO_PLATFORM == RETRO_3DS
+#define RETRO_USE_LEGACY (0)
+#elif RETRO_REV0U
+#define RETRO_USE_LEGACY (1)
+#endif
 
 // Forces all DLC flags to be disabled, this should be enabled in any public releases
 #ifndef RSDK_AUTOBUILD
@@ -624,7 +632,10 @@ extern "C" {
 #include "RSDK/Scene/Objects/DevOutput.hpp"
 #endif
 
-#if !RETRO_REV0U
+#if RETRO_PLATFORM == RETRO_3DS
+#define ENGINE_VERSION (engine.version)
+#define ENGINE_V_NAME "v5C"
+#elif !RETRO_REV0U
 #define ENGINE_VERSION (5)
 #define ENGINE_V_NAME  "v5"
 #else
@@ -775,7 +786,7 @@ void ReleaseConsole();
 
 void SendQuitMsg();
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/RetroEngineLegacy.hpp"
 #endif
 

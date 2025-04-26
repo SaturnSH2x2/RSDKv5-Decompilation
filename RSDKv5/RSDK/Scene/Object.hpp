@@ -320,7 +320,7 @@ bool32 CheckPosOnScreen(Vector2 *position, Vector2 *range);
 
 void ClearStageObjects();
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/ObjectLegacy.hpp"
 #endif
 

@@ -215,7 +215,7 @@ void InitStringList(String *stringList, int32 size);
 void LoadStringList(String *stringList, const char *filePath, uint32 charSize);
 bool32 SplitStringList(String *splitStrings, String *stringList, int32 startStringID, int32 stringCount);
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/TextLegacy.hpp"
 #endif
 

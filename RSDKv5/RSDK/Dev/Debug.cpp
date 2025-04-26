@@ -70,7 +70,7 @@ void RSDK::PrintLog(int32 mode, const char *message, ...)
                 }
                 break;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
             case PRINT_SCRIPTERR:
                 engine.storedState     = RSDK::Legacy::gameMode;
                 RSDK::Legacy::gameMode = RSDK::Legacy::ENGINE_SCRIPTERROR;
@@ -277,7 +277,7 @@ void RSDK::OpenDevMenu()
     devMenu.scrollPos = 0;
     devMenu.timer     = 0;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
     switch (engine.version) {
         default: break;
 
@@ -307,7 +307,7 @@ void RSDK::OpenDevMenu()
 
 void RSDK::CloseDevMenu()
 {
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
     switch (engine.version) {
         default: break;
         case 5:
@@ -500,7 +500,7 @@ void RSDK::DevMenu_MainMenu()
         confirm = controller[CONT_ANY].keyB.press;
 
     if (controller[CONT_ANY].keyStart.press || confirm) {
-#if RETRO_USE_MOD_LOADER && RETRO_REV0U
+#if RETRO_USE_MOD_LOADER && RETRO_USE_LEGACY
         if (devMenu.selection <= 1 && devMenu.startingVersion != engine.version) {
             // goofy aaa hack
             RSDK::Legacy::stageMode = RSDK::Legacy::STAGEMODE_NORMAL;
@@ -511,7 +511,7 @@ void RSDK::DevMenu_MainMenu()
             case 0: CloseDevMenu(); break;
 
             case 1:
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
                 switch (engine.version) {
                     default: break;
                     case 5: sceneInfo.state = ENGINESTATE_LOAD; break;
@@ -841,7 +841,7 @@ void RSDK::DevMenu_SceneSelectMenu()
             sceneInfo.activeCategory = devMenu.listPos;
             sceneInfo.listPos        = devMenu.selection + list->sceneOffsetStart;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
             switch (engine.version) {
                 default: break;
                 case 5: sceneInfo.state = ENGINESTATE_LOAD; break;

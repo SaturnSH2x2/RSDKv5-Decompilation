@@ -420,7 +420,7 @@ inline void ClearGfxSurfaces()
     }
 }
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/DrawingLegacy.hpp"
 #endif
 

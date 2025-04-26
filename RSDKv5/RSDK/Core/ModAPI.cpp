@@ -4,7 +4,7 @@
 
 using namespace RSDK;
 
-#if RETRO_REV0U
+#if RETRO_USE_LEGACY
 #include "Legacy/ModAPILegacy.cpp"
 #endif
 
