@@ -110,46 +110,22 @@ void RSDK::RegisterStaticVariables(void **staticVars, const char *name, uint32 c
     if (aligned < dataPos)                                                                                                                           \
         dataPos = aligned + sizeof(type);
 
-inline void ReadInStaticVariable(StaticVarRef* varRef, uint8_t* ptr) {}
-
-void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
-{
-    char fullFilePath[0x40];
-
-    const char *hexChars = "0123456789ABCDEF";
-    volatile char classHash[]     = "00000000000000000000000000000000";
-
-    int32 strPos = 0;
-    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[0] >> i) & 0xF];
-    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[1] >> i) & 0xF];
-    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[2] >> i) & 0xF];
-    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[3] >> i) & 0xF];
-
-    //sprintf_s(fullFilePath, sizeof(fullFilePath), "Data/Objects/Static/%s.bin", classHash);
-
-    //FileInfo info;
-    //InitFileInfo(&info);
-
-    // TODO: add file reading support back in at some point
+inline void ReadStaticVarFromCache(uint8* classPtr, char* classHash, int32 readOffset) {
     StaticVarRef* varRef;
     GetCachedStaticVar((char*) classHash, &varRef);
     
     if (varRef) {
-        //uint32 sig = ReadInt32(&info, false);
         uint8_t* ptr = varRef->ref;
         volatile uint32 sig = *((uint32_t*) ptr);
         ptr += 4;
 
         if (sig != RSDK_SIGNATURE_OBJ) {
-            //CloseFile(&info);
             return;
         }
 
         int32 dataPos = 4;
         int32 cachePos = 4;
         while (dataPos < varRef->size) {
-            //int32 type      = ReadInt8(&info);
-            //int32 arraySize = ReadInt32(&info, false);
             int32 type = *((uint8_t*) ptr);
             ptr++;
             cachePos++;
@@ -163,7 +139,6 @@ void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
 
             int32 aligned = 0;
             if (hasValues) {
-                //uint32 count = ReadInt32(&info, false);
                 uint32 count = *((uint32_t*) ptr);
                 ptr += 4;
                 cachePos += 4;
@@ -181,14 +156,12 @@ void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
                         if (cachePos + (count * sizeof(uint8)) <= varRef->size && &classPtr[dataPos]) {
                         if (dataPos)
                             for (int32 i = 0; i < count * sizeof(uint8); i += sizeof(uint8)) {
-                              //ReadBytes(&info, &classPtr[dataPos + i], sizeof(uint8));
                               *(uint8_t*) &classPtr[dataPos + i] = *((uint8_t*) ptr);
                               ptr++;
                               cachePos++;
                             }
                         }
                         else {
-                            //info.readPos += count * sizeof(uint8);
                             cachePos += count * sizeof(uint8_t);
                             ptr += count * sizeof(uint8_t);
                         }
@@ -203,16 +176,9 @@ void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
                         //if (info.readPos + (count * sizeof(int16)) <= info.fileSize && &classPtr[dataPos]) {
                         if (cachePos + (count * sizeof(int16)) <= varRef->size && &classPtr[dataPos]) {
                             for (int32 i = 0; i < count * sizeof(int16); i += sizeof(int16)) {
-#if !RETRO_USE_ORIGINAL_CODE
-                                //*(int16 *)&classPtr[dataPos + i] = ReadInt16(&info);
                                 *(int16*) &classPtr[dataPos + i] = *((int16*) ptr);
                                 ptr += 2;
                                 cachePos += 2;
-#else
-                                // This only works as intended on little-endian CPUs.
-                                ReadBytes(&info, &classPtr[dataPos + i], sizeof(int16));
-
-#endif
                             }
                         }
                         else {
@@ -232,16 +198,9 @@ void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
                         //if (info.readPos + (count * sizeof(int32)) <= info.fileSize && &classPtr[dataPos]) {
                         if (cachePos + (count * sizeof(int32)) <= varRef->size && &classPtr[dataPos]) {
                             for (int32 i = 0; i < count * sizeof(int32); i += sizeof(int32)) {
-#if !RETRO_USE_ORIGINAL_CODE
-                                //*(int32 *)&classPtr[dataPos + i] = ReadInt32(&info, false);
                                 *(int32*) &classPtr[dataPos + i] = *((int32*) ptr);
                                 ptr += 4;
                                 cachePos += 4;
-#else
-                                // This only works as intended on little-endian CPUs.
-                                ReadBytes(&info, &classPtr[dataPos + i], sizeof(int32));
-
-#endif
                             }
                         }
                         else {
@@ -260,20 +219,13 @@ void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
                         //if (info.readPos + (count * sizeof(bool32)) <= info.fileSize && &classPtr[dataPos]) {
                         if (cachePos + (count * sizeof(bool32)) <= varRef->size && &classPtr[dataPos]) {
                             for (int32 i = 0; i < count * sizeof(bool32); i += sizeof(bool32)) {
-#if !RETRO_USE_ORIGINAL_CODE
-                                //*(bool32 *)&classPtr[dataPos + i] = (bool32)ReadInt32(&info, false);
                                 *(bool32*) &classPtr[dataPos + i] = *((bool32*) ptr);
                                 ptr += 4;
                                 cachePos += 4;
-#else
-                                // This only works as intended on little-endian CPUs.
-                                ReadBytes(&info, &classPtr[dataPos + i], sizeof(bool32));
 
-#endif
                             }
                         }
                         else {
-                            //info.readPos += count * sizeof(bool32);
                             cachePos += count * sizeof(bool32);
                             ptr += count * sizeof(bool32);
                         }
@@ -352,9 +304,218 @@ void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
                 }
             }
         }
-
-        //CloseFile(&info);
     }
+
+}
+
+inline void ReadStaticVarFromFile(uint8* classPtr, char* classHash, int32 readOffset) {
+    char fullFilePath[0x40];
+    sprintf_s(fullFilePath, sizeof(fullFilePath), "Data/Objects/Static/%s.bin", classHash);
+
+    FileInfo info;
+    InitFileInfo(&info);
+
+    if (LoadFile(&info, fullFilePath, FMODE_RB)) {
+        uint32 sig = ReadInt32(&info, false);
+
+        if (sig != RSDK_SIGNATURE_OBJ) {
+            CloseFile(&info);
+            return;
+        }
+
+        int32 dataPos = 4;
+        int32 cachePos = 4;
+        while (info.readPos < info.fileSize) {
+            int32 type      = ReadInt8(&info);
+            int32 arraySize = ReadInt32(&info, false);
+
+            bool32 hasValues = (type & 0x80) != 0;
+            type &= 0x7F;
+
+            int32 aligned = 0;
+            if (hasValues) {
+                uint32 count = ReadInt32(&info, false);
+
+                switch (type) {
+                    default:
+#if !RETRO_USE_ORIGINAL_CODE
+                        PrintLog(PRINT_NORMAL, "Invalid static variable type: %d", type);
+#endif
+                        break;
+
+                    case SVAR_UINT8:
+                    case SVAR_INT8:
+                        if (info.readPos + (count * sizeof(uint8)) <= info.fileSize && &classPtr[dataPos]) {
+                          for (int32 i = 0; i < count * sizeof(uint8); i += sizeof(uint8)) {
+                            ReadBytes(&info, &classPtr[dataPos + i], sizeof(uint8));
+                          }
+                        }
+                        else {
+                            info.readPos += count * sizeof(uint8);
+                        }
+
+                        dataPos += count * sizeof(uint8);
+                        break;
+
+                    case SVAR_UINT16:
+                    case SVAR_INT16: {
+                        ALIGN_TO(int16);
+
+                        if (info.readPos + (count * sizeof(int16)) <= info.fileSize && &classPtr[dataPos]) {
+                            for (int32 i = 0; i < count * sizeof(int16); i += sizeof(int16)) {
+#if !RETRO_USE_ORIGINAL_CODE
+                                *(int16 *)&classPtr[dataPos + i] = ReadInt16(&info);
+#else
+                                // This only works as intended on little-endian CPUs.
+                                ReadBytes(&info, &classPtr[dataPos + i], sizeof(int16));
+
+#endif
+                            }
+                        }
+                        else {
+                            info.readPos += count * sizeof(int16);
+                        }
+
+                        dataPos += sizeof(int16) * count;
+                        break;
+                    }
+
+                    case SVAR_UINT32:
+                    case SVAR_INT32: {
+                        ALIGN_TO(int32);
+
+                        if (info.readPos + (count * sizeof(int32)) <= info.fileSize && &classPtr[dataPos]) {
+                            for (int32 i = 0; i < count * sizeof(int32); i += sizeof(int32)) {
+#if !RETRO_USE_ORIGINAL_CODE
+                                *(int32 *)&classPtr[dataPos + i] = ReadInt32(&info, false);
+#else
+                                // This only works as intended on little-endian CPUs.
+                                ReadBytes(&info, &classPtr[dataPos + i], sizeof(int32));
+
+#endif
+                            }
+                        }
+                        else {
+                            info.readPos += count * sizeof(int32);
+                        }
+
+                        dataPos += sizeof(int32) * count;
+                        break;
+                    }
+
+                    case SVAR_BOOL: {
+                        ALIGN_TO(bool32);
+
+                        if (info.readPos + (count * sizeof(bool32)) <= info.fileSize && &classPtr[dataPos]) {
+                            for (int32 i = 0; i < count * sizeof(bool32); i += sizeof(bool32)) {
+#if !RETRO_USE_ORIGINAL_CODE
+                                *(bool32 *)&classPtr[dataPos + i] = (bool32)ReadInt32(&info, false);
+#else
+                                // This only works as intended on little-endian CPUs.
+                                ReadBytes(&info, &classPtr[dataPos + i], sizeof(bool32));
+
+#endif
+                            }
+                        }
+                        else {
+                            info.readPos += count * sizeof(bool32);
+                        }
+
+                        dataPos += sizeof(bool32) * count;
+                        break;
+                    }
+                }
+            }
+            else {
+                switch (type) {
+                    case SVAR_UINT8:
+                    case SVAR_INT8: dataPos += sizeof(uint8) * arraySize; break;
+
+                    case SVAR_UINT16:
+                    case SVAR_INT16:
+                        ALIGN_TO(int16);
+
+                        dataPos += sizeof(int16) * arraySize;
+                        break;
+
+                    case SVAR_UINT32:
+                    case SVAR_INT32:
+                        ALIGN_TO(int32);
+
+                        dataPos += sizeof(int32) * arraySize;
+                        break;
+
+                    case SVAR_BOOL:
+                        ALIGN_TO(bool32);
+
+                        dataPos += sizeof(bool32) * arraySize;
+                        break;
+
+                    case SVAR_POINTER:
+                        ALIGN_TO(void *);
+
+                        dataPos += sizeof(void *) * arraySize;
+                        break;
+
+                    case SVAR_VECTOR2:
+                        ALIGN_TO(int32);
+
+                        dataPos += sizeof(Vector2) * arraySize;
+                        break;
+
+                    case SVAR_STRING:
+                        ALIGN_TO(void *);
+
+                        dataPos += sizeof(String) * arraySize;
+                        break;
+
+                    case SVAR_ANIMATOR:
+                        ALIGN_TO(void *);
+
+                        dataPos += sizeof(Animator) * arraySize;
+                        break;
+
+                    case SVAR_HITBOX:
+                        ALIGN_TO(int16);
+
+                        dataPos += sizeof(Hitbox) * arraySize;
+                        break;
+
+                    case SVAR_SPRITEFRAME:
+                        ALIGN_TO(int16);
+
+                        dataPos += sizeof(GameSpriteFrame) * arraySize;
+                        break;
+
+                    default:
+#if !RETRO_USE_ORIGINAL_CODE
+                        PrintLog(PRINT_NORMAL, "Invalid data type: %d", type);
+#endif
+                        break;
+                }
+            }
+        }
+
+        CloseFile(&info);
+    }
+
+}
+
+void RSDK::LoadStaticVariables(uint8 *classPtr, uint32 *hash, int32 readOffset)
+{
+    const char *hexChars = "0123456789ABCDEF";
+    char classHash[]     = "00000000000000000000000000000000";
+
+    int32 strPos = 0;
+    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[0] >> i) & 0xF];
+    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[1] >> i) & 0xF];
+    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[2] >> i) & 0xF];
+    for (int32 i = 0; i < 32; i += 4) classHash[strPos++] = hexChars[(hash[3] >> i) & 0xF];
+
+    if (cachesEnabled & ENABLE_STATIC_CACHE)
+      ReadStaticVarFromCache(classPtr, classHash, readOffset);
+    else 
+      ReadStaticVarFromFile(classPtr, classHash, readOffset);
 }
 
 void RSDK::InitObjects()

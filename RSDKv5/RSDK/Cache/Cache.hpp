@@ -2,8 +2,11 @@
 #define CACHE_HPP
 
 #define STATIC_VAR_CACHE_SIZE (1024 * 24)   // 24 KB
+#define SPRITEBIN_CACHE_SIZE  (1024 * 638)  // 638 KB
+#define SPRITE_CACHE_SIZE     (1024 * 1024 * 6) + (3064)  // 6.3 MB
 
 #define STATIC_VAR_FILE_COUNT (70)
+#define SPRITEBIN_FILE_COUNT  (564)
 
 #define ENABLE_STATIC_CACHE     0b00000001
 #define ENABLE_TILECONFIG_CACHE 0b00000010
@@ -20,9 +23,18 @@ struct StaticVarRef {
   uint8_t* ref;
 };
 
+struct SpriteRef {
+  char name[24];
+  int32 size;
+  uint8_t* binRef;
+  uint8_t* imgRef;
+};
+
 namespace RSDK {
   extern uint8_t cachesEnabled;
   extern uint8_t* staticVarCache;
+  extern uint8_t* spriteBinCache;
+  extern uint8_t* spriteCache;
 
   extern StaticVarRef staticVarRefs[STATIC_VAR_FILE_COUNT];
 

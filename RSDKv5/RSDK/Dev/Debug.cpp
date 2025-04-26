@@ -356,13 +356,13 @@ void RSDK::DevMenu_MainMenu()
     char n3DSStr[4];
     if (isNew3DS) {
       snprintf(n3DSStr, 4, "Yes");
-      offset = 52;
     } else { 
       snprintf(n3DSStr, 4, "No");
-      offset = 48;
     }
 
-    FormatDevString(currentScreen->center.x - offset, y, 0, 0x808090, "New 3DS: %s", n3DSStr);
+    float memSize = (float) osGetMemRegionSize(MEMREGION_APPLICATION) / (1024.f * 1024.f);
+    FormatDevString(currentScreen->center.x - 116, y, 0, 0x808090, 
+                    "N3DS: %s / Mem Avail: %.1fM", n3DSStr, memSize);
 #endif
 
 #if RETRO_USE_MOD_LOADER
