@@ -29,11 +29,12 @@ DataStorage RSDK::dataStorage[DATASET_MAX];
 bool32 RSDK::InitStorage()
 {
 #if RETRO_PLATFORM == RETRO_3DS
-    dataStorage[DATASET_STG].storageLimit = 0x1032900; // 16.19751 Mib
-    dataStorage[DATASET_MUS].storageLimit = 0x42ff00;  // 4.187256 Mib
-    dataStorage[DATASET_SFX].storageLimit = 0x1400000; // 20 Mib
-    dataStorage[DATASET_STR].storageLimit = 1 * 0xf000;  // 0.058594 Mib
-    dataStorage[DATASET_TMP].storageLimit = 1 * 0x600000;  // 6 Mib
+                                                              // ~36 MB total
+    dataStorage[DATASET_STG].storageLimit = 0x1032900;        // 16.19751 MB
+    dataStorage[DATASET_MUS].storageLimit = 0x42ff00;         // 4.187256 MB
+    dataStorage[DATASET_SFX].storageLimit = 12 * 1024 * 1024; // 12 MB
+    dataStorage[DATASET_STR].storageLimit = 32 * 1024;        // 32 KB
+    dataStorage[DATASET_TMP].storageLimit = 3 * 1024 * 1024;  // 3 MB
 #else
     dataStorage[DATASET_STG].storageLimit = 24 * 1024 * 1024; // 24MB
     dataStorage[DATASET_MUS].storageLimit = 8 * 1024 * 1024;  //  8MB
