@@ -646,6 +646,10 @@ extern "C" {
 namespace RSDK
 {
 
+#if RETRO_PLATFORM == RETRO_3DS
+    extern bool isNew3DS;
+#endif
+
 struct RetroEngine {
     RetroEngine() {}
 
@@ -666,6 +670,8 @@ struct RetroEngine {
 #if !RETRO_USE_ORIGINAL_CODE
     uint8 focusPausedChannel[CHANNEL_COUNT];
 #endif
+
+
 
     bool32 initialized = false;
     bool32 hardPause   = false;

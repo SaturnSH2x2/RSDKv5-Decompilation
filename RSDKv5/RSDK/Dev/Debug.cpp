@@ -339,8 +339,10 @@ void RSDK::DevMenu_MainMenu()
     selectionColors[devMenu.selection] = 0xF0F0F0;
 
     // Info Box
-    int32 y = currentScreen->center.y - 80;
-    DrawRectangle(currentScreen->center.x - 128, currentScreen->center.y - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
+    int32 y = currentScreen->center.y - 110;
+    int32 allocated = 0;
+
+    DrawRectangle(currentScreen->center.x - 128, y - 4, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
     DrawDevString("RETRO ENGINE " ENGINE_V_NAME, currentScreen->center.x, y, ALIGN_CENTER, 0xF0F0F0);
 
     y += 8;
@@ -349,10 +351,6 @@ void RSDK::DevMenu_MainMenu()
     y += 8;
 
 #if RETRO_PLATFORM == RETRO_3DS
-    bool isNew3DS;
-    APT_CheckNew3DS(&isNew3DS);
-    int offset;
-
     char n3DSStr[4];
     if (isNew3DS) {
       snprintf(n3DSStr, 4, "Yes");
@@ -360,9 +358,9 @@ void RSDK::DevMenu_MainMenu()
       snprintf(n3DSStr, 4, "No");
     }
 
-    float memSize = (float) osGetMemRegionSize(MEMREGION_APPLICATION) / (1024.f * 1024.f);
-    FormatDevString(currentScreen->center.x - 116, y, 0, 0x808090, 
-                    "N3DS: %s / Mem Avail: %.1fM", n3DSStr, memSize);
+    float memUsed = (float) osGetMemRegionUsed(MEMREGION_APPLICATION) / (1024.f * 1024.f);
+    FormatDevString(currentScreen->center.x - 81, y, 0, 0x808090, 
+                    "N3DS: %s | Mem %.1fM", n3DSStr, memUsed);
 #endif
 
 #if RETRO_USE_MOD_LOADER
@@ -399,6 +397,7 @@ void RSDK::DevMenu_MainMenu()
                   INK_NONE, true);
 
     // Stage Storage
+    allocated += dataStorage[DATASET_STG].storageLimit;
     int32 stgUsed = (int32)((sizeof(int32) * dataStorage[DATASET_STG].usedStorage) / (float)dataStorage[DATASET_STG].storageLimit * 94.0);
     DrawRectangle(currentScreen->center.x - 99, y + 1, stgUsed, 6, 0xF0F0F0, 0xFF, INK_NONE, true);
     DrawDevString("STG", currentScreen->center.x - 126, y, 0, 0xF0F080);
@@ -408,6 +407,7 @@ void RSDK::DevMenu_MainMenu()
                 (float) dataStorage[DATASET_STG].storageLimit / (1024.f * 1024.f));
 
     // Music Storage
+    allocated += dataStorage[DATASET_MUS].storageLimit;
     int32 musUsed = (int32)((sizeof(int32) * dataStorage[DATASET_MUS].usedStorage) / (float)dataStorage[DATASET_MUS].storageLimit * 94.0);
     y += 10;
     DrawRectangle(currentScreen->center.x - 99, y + 1, musUsed, 6, 0xF0F0F0, 0xFF, INK_NONE, true);
@@ -418,6 +418,7 @@ void RSDK::DevMenu_MainMenu()
                 (float) dataStorage[DATASET_MUS].storageLimit / (1024.f * 1024.f));
 
     // SoundFX Storage
+    allocated += dataStorage[DATASET_SFX].storageLimit;
     int32 sfxUsed = (int32)((sizeof(int32) * dataStorage[DATASET_SFX].usedStorage) / (float)dataStorage[DATASET_SFX].storageLimit * 94.0);
     y += 10;
     DrawRectangle(currentScreen->center.x - 99, y + 1, sfxUsed, 6, 0xF0F0F0, 0xFF, INK_NONE, true);
@@ -428,6 +429,7 @@ void RSDK::DevMenu_MainMenu()
                 (float) dataStorage[DATASET_SFX].storageLimit / (1024.f * 1024.f));
 
     // String Storage
+    allocated += dataStorage[DATASET_STR].storageLimit;
     int32 strUsed = (int32)((sizeof(int32) * dataStorage[DATASET_STR].usedStorage) / (float)dataStorage[DATASET_STR].storageLimit * 94.0);
     y += 10;
     DrawRectangle(currentScreen->center.x - 99, y + 1, strUsed, 6, 0xF0F0F0, 0xFF, INK_NONE, true);
@@ -438,6 +440,7 @@ void RSDK::DevMenu_MainMenu()
                 (float) dataStorage[DATASET_STR].storageLimit / (1024.f * 1024.f));
 
     // Temp Storage
+    allocated += dataStorage[DATASET_TMP].storageLimit;
     int32 tmpUsed = (int32)((sizeof(int32) * dataStorage[DATASET_TMP].usedStorage) / (float)dataStorage[DATASET_TMP].storageLimit * 94.0);
     y += 10;
     DrawRectangle(currentScreen->center.x - 99, y + 1, tmpUsed, 6, 0xF0F0F0, 0xFF, INK_NONE, true);
@@ -446,6 +449,30 @@ void RSDK::DevMenu_MainMenu()
                 "%.2fM / %.2fM",
                 (float) dataStorage[DATASET_TMP].usedStorage * sizeof(int32) / (1024.f * 1024.f),
                 (float) dataStorage[DATASET_TMP].storageLimit / (1024.f * 1024.f));
+
+    y += 20;
+
+    DrawRectangle(currentScreen->center.x - 128, y - 2, 0x100, 36, 0x80, 0xFF,
+                  INK_NONE, true);
+
+    char staticChar = staticVarCache != NULL ? 'Y' : 'N';
+    char spriteBinChar = spriteBinCache != NULL ? 'Y' : 'N';
+    char spriteChar = spriteCache != NULL ? 'Y' : 'N';
+
+    if (staticVarCache)
+      allocated += STATIC_VAR_CACHE_SIZE;
+    if (spriteBinCache)
+      allocated += SPRITEBIN_CACHE_SIZE;
+    if (spriteCache)
+      allocated += SPRITE_CACHE_SIZE;
+
+    FormatDevString(currentScreen->center.x - 100, y, 0, 0xF0F080, 
+        "STA: %c / SBIN: %c / SPR: %c", 
+        staticChar, spriteBinChar, spriteChar);
+    y += 10;
+
+    FormatDevString(currentScreen->center.x - 96, y, 0, 0xF0F080,
+        "Total Allocated: %.2f MB", (float) allocated / (1024.f * 1024.f));
 
 #if !RETRO_USE_ORIGINAL_CODE
     DevMenu_HandleTouchControls(CORNERBUTTON_START);
@@ -587,7 +614,7 @@ void RSDK::DevMenu_CategorySelectMenu()
     };
     selectionColors[devMenu.selection - devMenu.scrollPos] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -738,7 +765,7 @@ void RSDK::DevMenu_SceneSelectMenu()
     };
     selectionColors[devMenu.selection - devMenu.scrollPos] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -891,7 +918,7 @@ void RSDK::DevMenu_OptionsMenu()
 #endif
     selectionColors[devMenu.selection] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 256, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -1017,7 +1044,7 @@ void RSDK::DevMenu_VideoOptionsMenu()
     uint32 selectionColors[]           = { 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090 };
     selectionColors[devMenu.selection] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -1227,7 +1254,7 @@ void RSDK::DevMenu_AudioOptionsMenu()
     uint32 selectionColors[]           = { 0x808090, 0x808090, 0x808090, 0x808090 };
     selectionColors[devMenu.selection] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -1370,7 +1397,7 @@ void RSDK::DevMenu_InputOptionsMenu()
     uint32 selectionColors[]           = { 0x808090, 0x808090, 0x808090, 0x808090, 0x808090 };
     selectionColors[devMenu.selection] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -1462,7 +1489,7 @@ void RSDK::DevMenu_KeyMappingsMenu()
     DevMenu_HandleTouchControls(CORNERBUTTON_START);
 #endif
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -1588,7 +1615,7 @@ void RSDK::DevMenu_DebugOptionsMenu()
     uint32 selectionColors[]                               = { 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090 };
     selectionColors[devMenu.selection - devMenu.scrollPos] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -1885,7 +1912,7 @@ void RSDK::DevMenu_ModsMenu()
     uint32 selectionColors[]                               = { 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090, 0x808090 };
     selectionColors[devMenu.selection - devMenu.scrollPos] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;
@@ -2017,7 +2044,7 @@ void RSDK::DevMenu_PlayerSelectMenu()
     };
     selectionColors[devMenu.selection - devMenu.scrollPos] = 0xF0F0F0;
 
-    int32 dy = currentScreen->center.y;
+    int32 dy = currentScreen->center.y - 30;
     DrawRectangle(currentScreen->center.x - 128, dy - 84, 0x100, 0x30, 0x80, 0xFF, INK_NONE, true);
 
     dy -= 68;

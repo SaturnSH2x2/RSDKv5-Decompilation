@@ -2,7 +2,7 @@ using namespace RSDK;
 
 #include <thread>
 
-#if !SAMPLE_USE_S16
+#if !(SAMPLE_USE_S16 || SAMPLE_USE_U8)
 #error "ERROR: Incompatible sample format for 3DS builds."
 #endif
 

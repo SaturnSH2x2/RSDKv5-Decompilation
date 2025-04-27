@@ -6,12 +6,14 @@ namespace RSDK
 #if RETRO_PLATFORM == RETRO_3DS
 #define SAMPLE_USE_FLOAT (0)
 #define SAMPLE_USE_S16   (1)
+#define SFX_STORE_U8     (1)
 #define SAMPLE_FORMAT    s16
 // Helper to add two s16 samples and clamp back to s16
 #define ADD_CLAMP_S16(x,y) CLAMP((int32)x + (int32)y, -0x7FFF, 0x7FFF)
 #else 
 #define SAMPLE_USE_FLOAT (1)
 #define SAMPLE_USE_S16   (0)
+#define SFX_STORE_U8     (0)
 #define SAMPLE_FORMAT    float
 #endif
 

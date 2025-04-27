@@ -61,6 +61,10 @@ void AudioDeviceBase::ProcessAudioMixing(void *stream, int32 length)
 
     memset(stream, 0, length * sizeof(SAMPLE_FORMAT));
 
+#if SFX_STORE_U8
+    int16 sample0, sample1;
+#endif
+
     for (int32 c = 0; c < CHANNEL_COUNT; ++c) {
         ChannelInfo *channel = &channels[c];
 
@@ -69,7 +73,12 @@ void AudioDeviceBase::ProcessAudioMixing(void *stream, int32 length)
             case CHANNEL_IDLE: break;
 
             case CHANNEL_SFX: {
+#if SFX_STORE_U8
+                u8* sfxBuffer = (u8*) &channel->samplePtr[0];
+                sfxBuffer += channel->bufferPos;
+#else
                 SAMPLE_FORMAT *sfxBuffer = &channel->samplePtr[channel->bufferPos];
+#endif
 
                 float volL = channel->volume, volR = channel->volume;
                 if (channel->pan < 0.0f)
@@ -90,8 +99,16 @@ void AudioDeviceBase::ProcessAudioMixing(void *stream, int32 length)
                         sample = 0;
                     else
 #endif
+
+#if SFX_STORE_U8
+                      // offload u8 -> s16 conversion to buffer filling
+                      sample0 = (s16) (sfxBuffer[0] << 8) - 32768;
+                      sample1 = (s16) (sfxBuffer[1] << 8) - 32768;
+                      sample = (sample1 - sample0) * linearInterpolationLookup[speedPercent / LINEAR_INTERPOLATION_LOOKUP_DIVISOR] + sample0;
+#else
                         sample = (sfxBuffer[1] - sfxBuffer[0]) * linearInterpolationLookup[speedPercent / LINEAR_INTERPOLATION_LOOKUP_DIVISOR]
                                  + sfxBuffer[0];
+#endif
 
                     speedPercent += channel->speed;
                     sfxBuffer += FROM_FIXED(speedPercent);
@@ -117,7 +134,11 @@ void AudioDeviceBase::ProcessAudioMixing(void *stream, int32 length)
                             channel->bufferPos -= (uint32)channel->sampleLength;
                             channel->bufferPos += channel->loop;
 
+#if SFX_STORE_U8
+                            sfxBuffer = (u8*) &channel->samplePtr[channel->bufferPos];
+#else
                             sfxBuffer = &channel->samplePtr[channel->bufferPos];
+#endif
                         }
                     }
                 }
@@ -390,19 +411,31 @@ void RSDK::LoadSfxToSlot(char *filename, uint8 slot, uint8 plays, uint8 scope)
                 if (sampleBits == 16)
                     length /= 2;
 
+#if SFX_STORE_U8
+                AllocateStorage((void**) &sfxList[slot].buffer, sizeof(u8) * length, DATASET_SFX, false);
+#else
                 AllocateStorage((void **)&sfxList[slot].buffer, sizeof(SAMPLE_FORMAT) * length, DATASET_SFX, false);
+#endif
                 sfxList[slot].length = length;
 
+#if SFX_STORE_U8
+                u8* buffer = (u8*) sfxList[slot].buffer;
+#else
                 SAMPLE_FORMAT *buffer = (SAMPLE_FORMAT *)sfxList[slot].buffer;
+#endif
                 if (sampleBits == 8) {
                     for (int32 s = 0; s < length; ++s) {
 #if SAMPLE_USE_FLOAT
                         int32 sample = ReadInt8(&info);
                         *buffer++    = (sample - 0x80) / (float)0x80;
 #elif SAMPLE_USE_S16
+#if SFX_STORE_U8
+                        *buffer++ = (u8) ReadInt8(&info);
+#else
                         int16 sample = (int16) ReadInt8(&info);
                         int16 sample16 = (int16) (sample << 8) - 32768;
                         *buffer++ = sample16;
+#endif
 #endif
                     }
                 }
@@ -421,7 +454,13 @@ void RSDK::LoadSfxToSlot(char *filename, uint8 slot, uint8 plays, uint8 scope)
                         int16 sample = ReadInt16(&info);
                         if (sample > 0x7FFF)
                             sample = (sample & 0x7FFF) - 0x8000;
+
+#if SFX_STORE_U8
+                        u8 sample8 = (u8) (sample >> 8) + 127;
+                        *buffer++ = sample8;
+#else
                         *buffer++ = sample;
+#endif
 #endif
                     }
                 }

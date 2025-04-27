@@ -6,6 +6,10 @@ using namespace RSDK;
 #include "Legacy/RetroEngineLegacy.cpp"
 #endif
 
+#if RETRO_PLATFORM == RETRO_3DS
+bool RSDK::isNew3DS = false;
+#endif
+
 LogicLinkHandle RSDK::linkGameLogic = NULL;
 
 Link::Handle gameLogicHandle = NULL;
@@ -641,6 +645,10 @@ void RSDK::InitEngine()
 {
 #if RETRO_PLATFORM == RETRO_ANDROID
     ShowLoadingIcon(); // if valid
+#endif
+
+#if RETRO_PLATFORM == RETRO_3DS
+    APT_CheckNew3DS(&isNew3DS);
 #endif
 
 #if RETRO_USE_LEGACY
