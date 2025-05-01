@@ -24,10 +24,13 @@ struct StaticVarRef {
 };
 
 struct SpriteRef {
-  char name[24];
-  int32 size;
+  RETRO_HASH_MD5(hash);
   uint8_t* binRef;
-  uint8_t* imgRef;
+};
+
+struct SprTexRef {
+  RETRO_HASH_MD5(hash);
+  uint8_t* ref;
 };
 
 namespace RSDK {
@@ -37,6 +40,7 @@ namespace RSDK {
   extern uint8_t* spriteCache;
 
   extern StaticVarRef staticVarRefs[STATIC_VAR_FILE_COUNT];
+  extern SpriteRef spriteBinRefs[SPRITEBIN_FILE_COUNT];
 
   inline void GetCachedStaticVar(char* hash, StaticVarRef** ptr) {
     for (int i = 0; i < STATIC_VAR_FILE_COUNT; i++) {

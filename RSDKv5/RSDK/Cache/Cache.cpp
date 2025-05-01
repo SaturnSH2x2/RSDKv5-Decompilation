@@ -11,6 +11,7 @@ uint8_t* RSDK::spriteBinCache = NULL;
 uint8_t* RSDK::spriteCache = NULL;
 
 StaticVarRef RSDK::staticVarRefs[STATIC_VAR_FILE_COUNT];
+SpriteRef    RSDK::spriteBinRefs[SPRITEBIN_FILE_COUNT];
 
 void RSDK::InitCache(uint8_t cacheFlags) {
   char pathBuf[0x40];
@@ -65,7 +66,66 @@ void RSDK::InitCache(uint8_t cacheFlags) {
           PrintLog(PRINT_NORMAL, "Failed to allocate cache for sprites");
       }
 
-      // TODO: read in sprite bins
+      char* strPtr;
+      int sprSheetRef = 0;
+
+      FileInfo binInfo, sprInfo;
+      InitFileInfo(&binInfo);
+      InitFileInfo(&sprInfo);
+
+      ptr = spriteBinCache;
+
+      for (int i = 0; i < SPRITEBIN_FILE_COUNT; i++) {
+        sprintf_s(pathBuf, sizeof(pathBuf), "Data/Sprites/%s", spriteBinFilenames[i]);
+        if (LoadFile(&binInfo, pathBuf, FMODE_RB)) {
+          spriteBinRefs[i].binRef = ptr;
+          GEN_HASH_MD5(spriteBinFilenames[i], spriteBinRefs[i].hash);
+
+          while (binInfo.readPos < binInfo.fileSize) {
+            *ptr = ReadInt8(&binInfo);
+            ptr++;
+          }
+
+          /*
+          if (spriteCache) {
+            ptr = spriteBinRefs[i].binRef;
+            
+            uint32 sig = (uint32) *ptr;
+            ptr += 4;
+
+            if (sig != RSDK_SIGNATURE_SPR)
+              continue;
+
+            // skip over frame count 
+            ptr += 4;
+
+            uint8 sheetCount = (uint8) *ptr;
+            if (sheetCount > 4) {
+              // hopefully this never happens
+              PrintLog(PRINT_NORMAL, "WARNING: SHEET COUNT GREATER THAN 4, STUFF WILL BREAK");
+              sheetCount = 4;
+            }
+
+            for (int s = 0; s < sheetCount; s++) {
+              strPtr = (char*) ptr;
+              sprintf_s(pathBuf, sizeof(pathBuf), "Data/Sprites/%s", sprPtr);
+              
+              if (LoadFile(&sprInfo, pathBuf, FMODE_RB)) {
+
+              }
+
+              // move on to next string
+              while (*ptr != '\0')
+                ptr++;
+              ptr++;
+            }
+          }
+          */
+
+          CloseFile(&binInfo);
+        }
+      }
+
     } else {
       PrintLog(PRINT_NORMAL, "Failed to allocate cache for sprite bins");
     }
