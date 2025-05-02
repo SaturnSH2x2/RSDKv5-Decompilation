@@ -87,13 +87,15 @@ bool32 AudioDevice::Init()
     buf += WAVEBUF_SIZE / sizeof(buf[0]);
   }
 
+  APT_SetAppCpuTimeLimit(30);
+
   // create audio thread
   // (run on same core as main thread)
   s32 prio = GetThreadPriority();
   threadRunning = true;
   audioThreadHandle = threadCreate(AudioThread, 0,
                                           THREAD_STACK_SZ, prio,
-                                          0, false);
+                                          1, false);
   if (!audioThreadHandle) {
     PrintLog(PRINT_NORMAL, "ERROR: failed to init audio thread\n");
   }
