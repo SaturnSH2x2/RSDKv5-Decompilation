@@ -41,6 +41,8 @@ float linearInterpolationLookup[LINEAR_INTERPOLATION_LOOKUP_LENGTH];
 #include "CTR/CTRAudioDevice.cpp"
 #endif
 
+FileInfo RSDK::asyncInfo;
+
 uint8 AudioDeviceBase::initializedAudioChannels = false;
 uint8 AudioDeviceBase::audioState               = 0;
 uint8 AudioDeviceBase::audioFocus               = 0;
@@ -248,22 +250,31 @@ void RSDK::UpdateStreamBuffer(ChannelInfo *channel)
     for (int32 i = 0; i < MIX_BUFFER_SIZE; ++i) channel->samplePtr[i] *= 0.5f;
 }
 
-void RSDK::LoadStream(ChannelInfo *channel)
+void RSDK::LoadStream(ChannelInfo *channel, bool asyncLoad)
 {
     if (channel->state != CHANNEL_LOADING_STREAM)
         return;
 
     stb_vorbis_close(vorbisInfo);
 
-    FileInfo info;
-    InitFileInfo(&info);
+    FileInfo* info;
+    FileInfo nonAsyncInfo;
 
-    if (LoadFile(&info, streamFilePath, FMODE_RB)) {
-        streamBufferSize = info.fileSize;
+    if (asyncLoad)
+      info = &nonAsyncInfo;
+    else 
+      info = &asyncInfo;
+    
+    InitFileInfo(info);
+
+    if (LoadFile(info, streamFilePath, FMODE_RB)) {
+        streamBufferSize = info->fileSize;
         streamBuffer     = NULL;
-        AllocateStorage((void **)&streamBuffer, info.fileSize, DATASET_MUS, false);
-        ReadBytes(&info, streamBuffer, streamBufferSize);
-        CloseFile(&info);
+        AllocateStorage((void **)&streamBuffer, info->fileSize, DATASET_MUS, false);
+        ReadBytes(info, streamBuffer, streamBufferSize);
+
+        if (!asyncLoad)
+          CloseFile(info);
 
         if (streamBufferSize > 0) {
             vorbisAlloc.alloc_buffer_length_in_bytes = 512 * 1024; // 512KiB
@@ -331,7 +342,7 @@ int32 RSDK::PlayStream(const char *filename, uint32 slot, uint32 startPos, uint3
     streamStartPos  = startPos;
     streamLoopPoint = loopPoint;
 
-    AudioDevice::HandleStreamLoad(channel, false);
+    AudioDevice::HandleStreamLoad(channel, loadASync);
 
     UnlockAudioDevice();
 

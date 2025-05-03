@@ -52,6 +52,7 @@ enum ChannelStates { CHANNEL_IDLE, CHANNEL_SFX, CHANNEL_STREAM, CHANNEL_LOADING_
 
 extern SFXInfo sfxList[SFX_COUNT];
 extern ChannelInfo channels[CHANNEL_COUNT];
+extern FileInfo asyncInfo;
 
 class AudioDeviceBase
 {
@@ -74,7 +75,7 @@ protected:
 };
 
 void UpdateStreamBuffer(ChannelInfo *channel);
-void LoadStream(ChannelInfo *channel);
+void LoadStream(ChannelInfo *channel, bool asyncLoad);
 int32 PlayStream(const char *filename, uint32 slot, uint32 startPos, uint32 loopPoint, bool32 loadASync);
 
 void LoadSfxToSlot(char *filename, uint8 slot, uint8 plays, uint8 scope);

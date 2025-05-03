@@ -25,8 +25,8 @@ using namespace RSDK;
 
 Thread RSDK::audioThreadHandle;
 Handle audioThreadRequest;
-
 volatile bool threadRunning;
+ChannelInfo* streamChannel;
 
 ndspWaveBuf wbuf[WAVEBUF_COUNT];
 int16* audioBuffer = NULL;
@@ -92,7 +92,6 @@ bool32 AudioDevice::Init()
   APT_SetAppCpuTimeLimit(30);
 
   // create audio thread
-  // (run on same core as main thread)
   s32 prio = GetThreadPriority();
   threadRunning = true;
   audioThreadHandle = threadCreate(AudioThread, 0,
@@ -107,6 +106,9 @@ bool32 AudioDevice::Init()
   
   // set audio callback (simply triggers audioThreadRequest event)
   ndspSetCallback(AudioCallback, NULL);
+
+  // set async stream channel ref to null 
+  streamChannel = NULL;
   
   return true;
 }
@@ -137,12 +139,12 @@ void AudioDevice::FrameInit() {
 
 void AudioDevice::HandleStreamLoad(ChannelInfo* channel, bool32 async)
 {
-  // TODO: *properly* support async loading eventually
   if (async) {
-    std::thread thread(LoadStream, channel);
-    thread.detach();
+    //std::thread thread(LoadStream, channel);
+    //thread.detach();
+    streamChannel = channel;
   } else {
-    LoadStream(channel);
+    LoadStream(channel, false);
   }
 }
 
@@ -150,6 +152,11 @@ void AudioThread(void* arg) {
   PrintLog(PRINT_NORMAL, "CTRAudioDevice: audio thread created\n");
 
   while (threadRunning) {
+    if (streamChannel) {
+      LoadStream(streamChannel, true);
+      streamChannel = NULL;
+    }
+
     for (size_t i = 0; i < WAVEBUF_COUNT; i++) {
       if (wbuf[i].status != NDSP_WBUF_DONE)
         continue;

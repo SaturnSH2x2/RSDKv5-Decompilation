@@ -1,5 +1,5 @@
-#define LockAudioDevice() { }
-#define UnlockAudioDevice() { }
+#define LockAudioDevice() { ndspChnSetPaused(0, true); }
+#define UnlockAudioDevice() { ndspChnSetPaused(0, false); }
 
 namespace RSDK
 {

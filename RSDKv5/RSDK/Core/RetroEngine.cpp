@@ -354,6 +354,9 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
 
 void RSDK::ProcessEngine()
 {
+    if (asyncInfo.file)
+      CloseFile(&asyncInfo);
+
     switch (sceneInfo.state) {
         default: break;
 
