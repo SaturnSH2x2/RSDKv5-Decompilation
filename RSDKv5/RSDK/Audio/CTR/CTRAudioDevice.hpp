@@ -3,6 +3,7 @@
 
 namespace RSDK
 {
+  extern Thread audioThreadHandle;
 
   class AudioDevice : public AudioDeviceBase
   {

@@ -21,7 +21,9 @@ using namespace RSDK;
 static const int WAVEBUF_SIZE = SAMPLES_PER_BUF * CHANNELS_PER_SAMPLE *
                                 sizeof(int16);
 
-Thread audioThreadHandle;
+using namespace RSDK;
+
+Thread RSDK::audioThreadHandle;
 Handle audioThreadRequest;
 
 volatile bool threadRunning;
@@ -135,6 +137,7 @@ void AudioDevice::FrameInit() {
 
 void AudioDevice::HandleStreamLoad(ChannelInfo* channel, bool32 async)
 {
+  // TODO: *properly* support async loading eventually
   if (async) {
     std::thread thread(LoadStream, channel);
     thread.detach();

@@ -102,9 +102,12 @@ void AudioDeviceBase::ProcessAudioMixing(void *stream, int32 length)
 
 #if SFX_STORE_U8
                       // offload u8 -> s16 conversion to buffer filling
-                      sample0 = (s16) (sfxBuffer[0] << 8) - 32768;
-                      sample1 = (s16) (sfxBuffer[1] << 8) - 32768;
-                      sample = (sample1 - sample0) * linearInterpolationLookup[speedPercent / LINEAR_INTERPOLATION_LOOKUP_DIVISOR] + sample0;
+                      //sample0 = (s16) (sfxBuffer[0] << 8) - 32768;
+                      //sample1 = (s16) (sfxBuffer[1] << 8) - 32768;
+                      sample = (s16) (sfxBuffer[0] << 8) - 32768;
+
+                      // ndsp already does interpolation
+                      //sample = (sample1 - sample0) * linearInterpolationLookup[speedPercent / LINEAR_INTERPOLATION_LOOKUP_DIVISOR] + sample0;
 #else
                         sample = (sfxBuffer[1] - sfxBuffer[0]) * linearInterpolationLookup[speedPercent / LINEAR_INTERPOLATION_LOOKUP_DIVISOR]
                                  + sfxBuffer[0];
@@ -328,7 +331,7 @@ int32 RSDK::PlayStream(const char *filename, uint32 slot, uint32 startPos, uint3
     streamStartPos  = startPos;
     streamLoopPoint = loopPoint;
 
-    AudioDevice::HandleStreamLoad(channel, loadASync);
+    AudioDevice::HandleStreamLoad(channel, false);
 
     UnlockAudioDevice();
 
