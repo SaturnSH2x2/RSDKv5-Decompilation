@@ -470,7 +470,7 @@ void RSDK::LoadSfxToSlot(char *filename, uint8 slot, uint8 plays, uint8 scope)
                             sample = (sample & 0x7FFF) - 0x8000;
 
 #if SFX_STORE_U8
-                        u8 sample8 = (u8) (sample >> 8) + 127;
+                        u8 sample8 = (u8) (sample >> 8) + 128;
                         *buffer++ = sample8;
 #else
                         *buffer++ = sample;
