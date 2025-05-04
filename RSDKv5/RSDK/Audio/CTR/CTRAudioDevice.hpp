@@ -4,6 +4,7 @@
 namespace RSDK
 {
   extern Thread audioThreadHandle;
+  extern LightLock audioThreadLock;
 
   class AudioDevice : public AudioDeviceBase
   {
