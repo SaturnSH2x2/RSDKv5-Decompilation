@@ -237,11 +237,17 @@ bool32 RSDK::OpenDataFile(FileInfo *info, const char *filename)
             }
 
 #if USE_SETVBUF
-            if (!info->iocache)
+            // don't cache io on any thread but the main thread
+            if (audioThreadHandle != threadGetCurrent()) {
+              if (info->iocache)
+                free(info->iocache);
+
               info->iocache = (uint8*)malloc(file->size);
-            setvbuf(info->file, (char*)info->iocache, _IOFBF, file->size);
-            fSeek(info->file, file->offset, SEEK_SET);
+              setvbuf(info->file, (char*)info->iocache, _IOFBF, file->size);
+            }
+
 #endif
+            fSeek(info->file, file->offset, SEEK_SET);
         }
         else {
             // a bit of a hack, but it is how it is in the original
