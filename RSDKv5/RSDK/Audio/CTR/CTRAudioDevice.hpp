@@ -1,10 +1,21 @@
-#define LockAudioDevice() { ndspChnSetPaused(0, true); }
-#define UnlockAudioDevice() { ndspChnSetPaused(0, false); }
+#define LOCK_TIMEOUT (32760)
 
 namespace RSDK
 {
   extern Thread audioThreadHandle;
+  extern LightLock asyncFileLock;
   extern LightLock audioThreadLock;
+
+  inline void LockAudioDevice() {
+    for (int i = 0; i < LOCK_TIMEOUT; i++) {
+      if (LightLock_TryLock(&audioThreadLock) == 0)
+        break;
+    }
+  }
+
+  inline void UnlockAudioDevice() {
+    LightLock_Unlock(&audioThreadLock);
+  }
 
   class AudioDevice : public AudioDeviceBase
   {

@@ -355,9 +355,9 @@ int32 RSDK::RunRetroEngine(int32 argc, char *argv[])
 void RSDK::ProcessEngine()
 {
 #if RETRO_PLATFORM == RETRO_3DS
-    if (LightLock_TryLock(&audioThreadLock) == 0) {
+    if (LightLock_TryLock(&asyncFileLock) == 0) {
       CloseFile(&asyncInfo);
-      LightLock_Unlock(&audioThreadLock);
+      LightLock_Unlock(&asyncFileLock);
     }
 #endif
 

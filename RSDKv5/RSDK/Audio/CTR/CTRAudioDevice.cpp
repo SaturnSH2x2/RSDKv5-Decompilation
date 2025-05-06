@@ -24,6 +24,7 @@ static const int WAVEBUF_SIZE = SAMPLES_PER_BUF * CHANNELS_PER_SAMPLE *
 using namespace RSDK;
 
 Thread RSDK::audioThreadHandle;
+LightLock RSDK::asyncFileLock;
 LightLock RSDK::audioThreadLock;
 
 Handle audioThreadRequest;
@@ -101,6 +102,7 @@ bool32 AudioDevice::Init()
                                           1, false);
 
   // init audio thread lock 
+  LightLock_Init(&asyncFileLock);
   LightLock_Init(&audioThreadLock);
 
   if (!audioThreadHandle) {
@@ -156,14 +158,17 @@ void AudioThread(void* arg) {
   PrintLog(PRINT_NORMAL, "CTRAudioDevice: audio thread created\n");
 
   while (threadRunning) {
+    LockAudioDevice();
+
     if (streamChannel) {
-      while (LightLock_TryLock(&audioThreadLock) != 0)
-        continue;
+      for (int t = 0; t < LOCK_TIMEOUT; t++)
+        if (LightLock_TryLock(&asyncFileLock) == 0)
+          break;
 
       LoadStream(streamChannel, true);
       streamChannel = NULL;
 
-      LightLock_Unlock(&audioThreadLock);
+      LightLock_Unlock(&asyncFileLock);
     }
 
     for (size_t i = 0; i < WAVEBUF_COUNT; i++) {
@@ -177,8 +182,9 @@ void AudioThread(void* arg) {
       DSP_FlushDataCache(wbuf[i].data_pcm16, WAVEBUF_SIZE);
     }
 
+    UnlockAudioDevice();
+
     svcWaitSynchronization(audioThreadRequest, UINT64_MAX);
     svcClearEvent(audioThreadRequest);
-
   }
 }
