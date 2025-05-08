@@ -16,6 +16,8 @@ SpriteRef    RSDK::spriteBinRefs[SPRITEBIN_FILE_COUNT];
 void RSDK::InitCache(uint8_t cacheFlags) {
   char pathBuf[0x40];
   uint8_t* ptr;
+  FILE* fCache;
+  int32 ptrOffset;
 
   if (cacheFlags & ENABLE_STATIC_CACHE) {
     // allocate cache
@@ -23,27 +25,58 @@ void RSDK::InitCache(uint8_t cacheFlags) {
     if (staticVarCache) {
       ptr = staticVarCache;
 
-      // if not, read from Data file/folder and save whole thing to user directory
-      FileInfo info;
-      InitFileInfo(&info);
-      for (int i = 0; i < STATIC_VAR_FILE_COUNT; i++) {
-        sprintf_s(pathBuf, sizeof(pathBuf), "Data/Objects/Static/%s", staticVarFilenames[i]);
-        if (LoadFile(&info, pathBuf, FMODE_RB)) {
-          // four characters *should* be enough for a hash comparison
-          staticVarRefs[i].hash[0] = staticVarFilenames[i][0];
-          staticVarRefs[i].hash[1] = staticVarFilenames[i][1];
-          staticVarRefs[i].hash[2] = staticVarFilenames[i][2];
-          staticVarRefs[i].hash[3] = staticVarFilenames[i][3];
+      // read data from decrypted cached file 
+      sprintf_s(pathBuf, sizeof(pathBuf), "%sstaticcache.bin", SKU::userFileDir);
+      fCache = fOpen(pathBuf, "rb");
+      if (fCache) {
+        for (int i = 0; i < STATIC_VAR_FILE_COUNT; i++) {
+          fRead(staticVarRefs[i].hash, sizeof(uint8_t), 4, fCache);
+          fRead(&ptrOffset, sizeof(int32), 1, fCache);
+          fRead(&staticVarRefs[i].size, sizeof(int32), 1, fCache);
 
-          staticVarRefs[i].ref = ptr;
-          staticVarRefs[i].size = info.fileSize;
+          staticVarRefs[i].ref = staticVarCache + ptrOffset;
+        }
 
-          while (info.readPos < info.fileSize) {
-            *ptr = ReadInt8(&info);
-            ptr++;
+        fRead(staticVarCache, sizeof(uint8_t), STATIC_VAR_CACHE_SIZE, fCache);
+        fClose(fCache);
+      } else {
+        // if not, read from Data file/folder and save whole thing to user directory
+        fCache = fOpen(pathBuf, "wb+");
+
+        FileInfo info;
+        InitFileInfo(&info);
+        for (int i = 0; i < STATIC_VAR_FILE_COUNT; i++) {
+          sprintf_s(pathBuf, sizeof(pathBuf), "Data/Objects/Static/%s", staticVarFilenames[i]);
+          if (LoadFile(&info, pathBuf, FMODE_RB)) {
+            // four characters *should* be enough for a hash comparison
+            staticVarRefs[i].hash[0] = staticVarFilenames[i][0];
+            staticVarRefs[i].hash[1] = staticVarFilenames[i][1];
+            staticVarRefs[i].hash[2] = staticVarFilenames[i][2];
+            staticVarRefs[i].hash[3] = staticVarFilenames[i][3];
+
+            staticVarRefs[i].ref = ptr;
+            staticVarRefs[i].size = info.fileSize;
+
+            ptrOffset = (int32) (ptr - staticVarCache);
+
+            if (fCache) {
+              fWrite(staticVarRefs[i].hash, sizeof(uint8_t), 4, fCache);
+              fWrite(&ptrOffset, sizeof(int32), 1, fCache);
+              fWrite(&staticVarRefs[i].size, sizeof(int32), 1, fCache);
+            }
+
+            while (info.readPos < info.fileSize) {
+              *ptr = ReadInt8(&info);
+              ptr++;
+            }
+
+            CloseFile(&info);
           }
+        }
 
-          CloseFile(&info);
+        if (fCache) {
+          fWrite((void*) staticVarCache, sizeof(uint8_t), STATIC_VAR_CACHE_SIZE, fCache);
+          fClose(fCache);
         }
       }
 
@@ -66,63 +99,54 @@ void RSDK::InitCache(uint8_t cacheFlags) {
           PrintLog(PRINT_NORMAL, "Failed to allocate cache for sprites");
       }
 
-      char* strPtr;
-      int sprSheetRef = 0;
+      sprintf_s(pathBuf, sizeof(pathBuf), "%ssbincache.bin", SKU::userFileDir);
+      fCache = fOpen(pathBuf, "rb");
 
-      FileInfo binInfo, sprInfo;
-      InitFileInfo(&binInfo);
-      InitFileInfo(&sprInfo);
-
-      ptr = spriteBinCache;
-
-      for (int i = 0; i < SPRITEBIN_FILE_COUNT; i++) {
-        sprintf_s(pathBuf, sizeof(pathBuf), "Data/Sprites/%s", spriteBinFilenames[i]);
-        if (LoadFile(&binInfo, pathBuf, FMODE_RB)) {
-          spriteBinRefs[i].binRef = ptr;
+      if (fCache) {
+        for (int i = 0; i < SPRITEBIN_FILE_COUNT; i++) {
           GEN_HASH_MD5(spriteBinFilenames[i], spriteBinRefs[i].hash);
+          fRead(&ptrOffset, sizeof(int32), 1, fCache);
 
-          while (binInfo.readPos < binInfo.fileSize) {
-            *ptr = ReadInt8(&binInfo);
-            ptr++;
-          }
+          spriteBinRefs[i].binRef = spriteBinCache + ptrOffset;
+        }
 
-          /*
-          if (spriteCache) {
-            ptr = spriteBinRefs[i].binRef;
-            
-            uint32 sig = (uint32) *ptr;
-            ptr += 4;
+        fRead(spriteBinCache, sizeof(uint8_t), SPRITEBIN_CACHE_SIZE, fCache);
+        fClose(fCache);
+      } else {
+        fCache = fOpen(pathBuf, "wb+");
 
-            if (sig != RSDK_SIGNATURE_SPR)
-              continue;
+        char* strPtr;
+        int sprSheetRef = 0;
 
-            // skip over frame count 
-            ptr += 4;
+        FileInfo binInfo, sprInfo;
+        InitFileInfo(&binInfo);
+        InitFileInfo(&sprInfo);
 
-            uint8 sheetCount = (uint8) *ptr;
-            if (sheetCount > 4) {
-              // hopefully this never happens
-              PrintLog(PRINT_NORMAL, "WARNING: SHEET COUNT GREATER THAN 4, STUFF WILL BREAK");
-              sheetCount = 4;
-            }
+        ptr = spriteBinCache;
 
-            for (int s = 0; s < sheetCount; s++) {
-              strPtr = (char*) ptr;
-              sprintf_s(pathBuf, sizeof(pathBuf), "Data/Sprites/%s", sprPtr);
-              
-              if (LoadFile(&sprInfo, pathBuf, FMODE_RB)) {
+        for (int i = 0; i < SPRITEBIN_FILE_COUNT; i++) {
+          sprintf_s(pathBuf, sizeof(pathBuf), "Data/Sprites/%s", spriteBinFilenames[i]);
+          if (LoadFile(&binInfo, pathBuf, FMODE_RB)) {
+            spriteBinRefs[i].binRef = ptr;
+            GEN_HASH_MD5(spriteBinFilenames[i], spriteBinRefs[i].hash);
 
-              }
+            ptrOffset = (int32) (ptr - spriteBinCache);
 
-              // move on to next string
-              while (*ptr != '\0')
-                ptr++;
+            if (fCache)
+              fWrite(&ptrOffset, sizeof(int32), 1, fCache);
+
+            while (binInfo.readPos < binInfo.fileSize) {
+              *ptr = ReadInt8(&binInfo);
               ptr++;
             }
-          }
-          */
 
-          CloseFile(&binInfo);
+            CloseFile(&binInfo);
+          }
+        }
+
+        if (fCache) {
+          fWrite((void*) spriteBinCache, sizeof(uint8_t), SPRITEBIN_CACHE_SIZE, fCache);
+          fClose(fCache);
         }
       }
 
@@ -132,9 +156,19 @@ void RSDK::InitCache(uint8_t cacheFlags) {
 
     cachesEnabled |= ENABLE_SPRITEBIN_CACHE;
   }
+
+  if (spriteBinCache) {
+    // TODO: cache all GIF files
+  }
 }
 
 void RSDK::FreeCache() {
   if (staticVarCache)
     free(staticVarCache);
+
+  if (spriteBinCache)
+    free(spriteBinCache);
+
+  if (spriteCache)
+    free(spriteCache);
 }
